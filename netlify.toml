@@ -1,0 +1,4 @@
+[[redirects]]
+from = "/*"
+to = "/restaurant-menu.html"
+status = 200
