@@ -1,126 +1,165 @@
 const menu = document.getElementById('show-form');
-        const drinksContainer = document.getElementById('drinks-container').querySelector('ul');
-        const sandwichesContainer = document.getElementById('sandwiches-container').querySelector('ul');
+const drinksContainer = document.getElementById('drinks-container').querySelector('ul');
+const sandwichesContainer = document.getElementById('sandwiches-container').querySelector('ul');
+const toggleButton = document.getElementById('toggle-button');
 
-        function showForm() {
-            menu.classList.remove('hidden');
+toggleButton.addEventListener('click', () => {
+    document.body.classList.toggle('dark');
+});
+
+function showForm() {
+    menu.classList.remove('hidden');
+}
+
+function hideForm() {
+    menu.classList.add('hidden');
+    resetForm();
+}
+
+document.getElementById('add-item-button').addEventListener('click', addItem);
+
+function addItem() {
+    const itemType = document.getElementById('item-type').value;
+    const itemName = document.getElementById('item-name').value;
+    const itemPrice = document.getElementById('item-price').value;
+    const itemDetails = document.getElementById('details').value;
+    const itemImage = document.getElementById('add-image').files[0];
+
+    let isValid = true;
+
+    document.querySelectorAll('.error').forEach(error => error.classList.add('hidden'));
+
+    if (!itemType) {
+        document.getElementById('type-error').classList.remove('hidden');
+        isValid = false;
+    }
+
+    if (!itemName) {
+        document.getElementById('name-error').classList.remove('hidden');
+        isValid = false;
+    }
+
+    if (!itemImage) {
+        document.getElementById('image-error').classList.remove('hidden');
+        isValid = false;
+    }
+
+    if (!itemPrice || itemPrice <= 0) {
+        document.getElementById('price-error').classList.remove('hidden');
+        isValid = false;
+    }
+
+    if (!itemDetails) {
+        document.getElementById('details-error').classList.remove('hidden');
+        isValid = false;
+    }
+
+    if (!isValid) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const newItem = {
+            name: itemName,
+            price: itemPrice,
+            description: itemDetails,
+            image: e.target.result
+        };
+
+        if (itemType === 'drinks') {
+            addItemToContainer(drinksContainer, newItem);
+        } else {
+            addItemToContainer(sandwichesContainer, newItem);
         }
 
-        function hideForm() {
-            menu.classList.add('hidden');
-            resetForm();
+        hideForm();
+    };
+
+    reader.readAsDataURL(itemImage);
+}
+
+function addItemToContainer(container, item) {
+    const itemHtml = `
+        <li>
+            <button class="remove-item" onclick="removeItem(this)">X</button>
+            <img src="${item.image}">
+            <b>${item.name}</b>
+            <b>$${item.price}</b>
+            <p>${item.description}</p>
+        </li>`;
+    container.innerHTML += itemHtml;
+}
+
+function removeItem(button) {
+    const itemLi = button.parentElement;
+    itemLi.remove();
+}
+
+function resetForm() {
+    document.getElementById('item-type').value = '';
+    document.getElementById('item-name').value = '';
+    document.getElementById('add-image').value = '';
+    document.getElementById('item-price').value = '';
+    document.getElementById('details').value = '';
+    document.getElementById('image-preview').style.display = 'none';
+    document.querySelectorAll('.error').forEach(error => error.classList.add('hidden'));
+}
+
+document.getElementById('item-type').addEventListener('change', () => hideError('type-error'));
+document.getElementById('item-name').addEventListener('input', () => hideError('name-error'));
+document.getElementById('add-image').addEventListener('change', () => hideError('image-error'));
+document.getElementById('item-price').addEventListener('input', () => hideError('price-error'));
+document.getElementById('details').addEventListener('input', () => hideError('details-error'));
+
+function hideError(errorId) {
+    document.getElementById(errorId).classList.add('hidden');
+}
+
+document.getElementById('add-image').addEventListener('change', function (event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById('image-preview');
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
         }
+        reader.readAsDataURL(file);
+    } else {
+        preview.style.display = 'none';
+    }
+});
 
-        document.getElementById('add-item-button').addEventListener('click', addItem);
+const hamburgerButton = document.getElementById('hamburger-button');
+const navMenu = document.getElementById('nav-menu');
 
-        function addItem() {
-            const itemType = document.getElementById('item-type').value;
-            const itemName = document.getElementById('item-name').value;
-            const itemPrice = document.getElementById('item-price').value;
-            const itemDetails = document.getElementById('details').value;
-            const itemImage = document.getElementById('add-image').files[0];
+hamburgerButton.addEventListener('click', () => {
+    if (navMenu.classList.contains('active')) {
+        navMenu.style.pointerEvents = 'none';
+        navMenu.classList.remove('active');
+        setTimeout(() => {
+            navMenu.classList.add('hidden');
+            navMenu.style.pointerEvents = '';
+        }, 300);
+    } else {
+        navMenu.classList.remove('hidden');
+        navMenu.style.pointerEvents = 'auto';
+        navMenu.classList.add('active');
+    }
+});
 
-            let isValid = true;
+document.addEventListener('click', (event) => {
+    if (!hamburgerButton.contains(event.target) && !navMenu.contains(event.target) && navMenu.classList.contains('active')) {
+        navMenu.classList.remove('active');
+        navMenu.classList.add('hidden');
+    }
+});
 
-            document.querySelectorAll('.error').forEach(error => error.classList.add('hidden'));
-
-            if (!itemType) {
-                document.getElementById('type-error').classList.remove('hidden');
-                isValid = false;
-            }
-
-            if (!itemName) {
-                document.getElementById('name-error').classList.remove('hidden');
-                isValid = false;
-            }
-
-            if (!itemImage) {
-                document.getElementById('image-error').classList.remove('hidden');
-                isValid = false;
-            }
-
-            if (!itemPrice || itemPrice <= 0) {
-                document.getElementById('price-error').classList.remove('hidden');
-                isValid = false;
-            }
-
-            if (!itemDetails) {
-                document.getElementById('details-error').classList.remove('hidden');
-                isValid = false;
-            }
-
-            if (!isValid) return;
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const newItem = {
-                    name: itemName,
-                    price: itemPrice,
-                    description: itemDetails,
-                    image: e.target.result
-                };
-
-                if (itemType === 'drinks') {
-                    addItemToContainer(drinksContainer, newItem);
-                } else {
-                    addItemToContainer(sandwichesContainer, newItem);
-                }
-
-                hideForm();
-            };
-
-            reader.readAsDataURL(itemImage);
-        }
-
-        function addItemToContainer(container, item) {
-            const itemHtml = `
-                <li>
-                    <button class="remove-item" onclick="removeItem(this)">X</button>
-                    <img src="${item.image}">
-                    <b>${item.name}</b>
-                    <b>$${item.price}</b>
-                    <p>${item.description}</p>
-                </li>`;
-            container.innerHTML += itemHtml;
-        }
-
-        function removeItem(button) {
-            const itemLi = button.parentElement; 
-            itemLi.remove(); 
-        }
-
-        function resetForm() {
-            document.getElementById('item-type').value = '';
-            document.getElementById('item-name').value = '';
-            document.getElementById('add-image').value = '';
-            document.getElementById('item-price').value = '';
-            document.getElementById('details').value = '';
-            document.getElementById('image-preview').style.display = 'none';
-            document.querySelectorAll('.error').forEach(error => error.classList.add('hidden'));
-        }
-
-        document.getElementById('item-type').addEventListener('change', () => hideError('type-error'));
-        document.getElementById('item-name').addEventListener('input', () => hideError('name-error'));
-        document.getElementById('add-image').addEventListener('change', () => hideError('image-error'));
-        document.getElementById('item-price').addEventListener('input', () => hideError('price-error'));
-        document.getElementById('details').addEventListener('input', () => hideError('details-error'));
-
-        function hideError(errorId) {
-            document.getElementById(errorId).classList.add('hidden');
-        }
-
-        document.getElementById('add-image').addEventListener('change', function (event) {
-            const file = event.target.files[0];
-            const preview = document.getElementById('image-preview');
-
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                }
-                reader.readAsDataURL(file);
-            } else {
-                preview.style.display = 'none';
-            }
-        });
+const navLinks = navMenu.querySelectorAll('a');
+navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+        navMenu.classList.remove('active');
+        navMenu.classList.add('hidden');
+        hamburgerButton.innerHTML = '<i class="fa fa-bars"></i>';
+    });
+});
